@@ -1,0 +1,98 @@
+Timesys Test Project
+README
+2015-07-16
+
+I. Introduction
+===============
+
+This is a simple collection of test applications, as well as a simple cross-build system
+and a framework for running these tests on the target.
+
+II. Usage
+=========
+
+In the /usr/tstp directory, run:
+
+./Test.sh
+
+This will run through the test suite. You can also pass the following options:
+
+ -a     Only run automated tests
+ -i     Only run interactive tests
+
+III. Configuration
+==================
+
+The test configuration files are:
+
+/usr/tstp/interactive.conf
+/usr/tstp/automated.conf
+
+They are the manifests for the interactive and automated tests, respectively. These
+configurations are very simple- they map a command and parameters to a test name. For
+interactive tests, they also provide the ability to prompt the test engineer before and/or
+after a test.
+
+To add a new test to the manifest, add the following:
+
+Automated Tests:
+
+run_test "Test name" "Test Command" "Test Parameters"
+
+ Test name         Human readable test name
+ Test command      Application to be executed for the test
+ Test parameters   Parameters to pass to the application
+
+Interactive Tests:
+
+run_test "Test Name" "Test Command" "Test Command Parameters" "Pre-test Prompt" ["Post Test Prompt"]
+ Test name         Human readable test name
+ Test command      Application to be executed for the test
+ Test parameters   Parameters to pass to the application
+ Pre-test Prompt   Prompt provided to user prior to the test execution
+ Post-test Prompt  Prompt provided to the user after test execution. Optional.
+
+If a post-test prompt is provided, it will be followed with a y/n/retry prompt. y will mark the test
+successful, n will mark it as a failure, and r will run the test again.
+
+If the post-test prompt is *not* provided, then the pre-test prompt will halt until a user presses
+a key to continue, and the return value of the Test command will determine success or failure.
+
+
+IV. Adding new tests to the build
+=================================
+
+Currently, the system supports shell scripts and C files.
+
+To add a test, copy the script into the appropriate directory under target (e.g. target/audio).
+Then, modify the .mk file in that directory to add it to the manifest.
+
+For scripts, these will be copied to the build directory (and subsequently the installation directory)
+when "make" is run.
+
+For C files, these will be compiled and then copied.
+
+V. Building
+===========
+
+You must have a proper cross-compilation environment set up. With Yocto, this can be done by running the
+following command from an installed SDK:
+
+source ~/SDK/armv7l/environment-setup-cortexa9hf-vfp-neon-poky-linux-gnueabi
+
+You can then run:
+
+make
+
+To build.
+
+VI. Installing
+==============
+
+To install, you can run:
+
+make install DESTDIR=/path/to/destination
+
+For instance, if you have an SD card with a partition named "rfs", you can run:
+
+make install DESTDIR=/media/rfs/
